@@ -1,43 +1,64 @@
 import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
 import Header from "../components/Header";
-import Footer from "../components/Footer";
 import UserDetails from "./UserDetails";
-import SessionDetails from "./SessionDetails";
-import OrgDetails from "./OrgDetails";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const [players, setPlayers] = useState<any[]>([]);
 
+  const getFiftyPlayers = async () => {
+    const response = await fetch(
+      `https://lichess.org/api/player/top/${50}/${`bullet`}`
+    );
+    const fiftyPlayers = await response.json();
+    const users = fiftyPlayers.users;
+    setPlayers(users);
+  };
+  useEffect(() => {
+    // getAllPlayers();
+    getFiftyPlayers();
+  }, []);
   return (
     <>
       <Header />
       <div className="px-8 py-12 sm:py-16 md:px-20">
         {user && (
           <>
-            <h1 className="text-3xl font-semibold text-black">
-              👋 Hi, {user.firstName || `Stranger`}
-            </h1>
-            <div className="grid gap-4 mt-8 lg:grid-cols-3">
-              <UserDetails />
-              <SessionDetails />
-              <OrgDetails />
+            <UserDetails />
+
+            <div className=" md:ml-60">
+              <h1 className="text-3xl font-semibold text-black">
+                👋 Hi, {user.firstName || `Stranger`}
+              </h1>
+              <div>
+                <div className="bg-white rounded-md p-8 mb-5">
+                  <h1 className="text-3xl font-bold mb-10">Chess Players</h1>
+
+                  <hr className="my-5" />
+                  <div className="grid grid-cols-1 gap-4">
+                    {players.map((player) => (
+                      <Link
+                        href={`/players/${player?.username}`}
+                        className="cursor-pointer"
+                        key={player?.id}
+                      >
+                        <div className="flex justify-between bg-gray-200 p-3 rounded-md">
+                          <h2>{player.id}</h2>
+                          <h2>{player.username}</h2>
+                          <span>{player?.perfs?.bullet?.rating}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            <h2 className="mt-16 mb-4 text-3xl font-semibold text-black">
-              What's next?
-            </h2>
-            Read the{" "}
-            <Link
-              className="font-medium text-primary-600 hover:underline"
-              href="https://clerk.com/docs?utm_source=vercel-template&utm_medium=template_repos&utm_campaign=nextjs_template"
-              target="_blank"
-            >
-              Clerk Docs -&gt;
-            </Link>
           </>
         )}
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

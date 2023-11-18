@@ -10,7 +10,7 @@ export default function Home() {
     <main className={`${inter.className} min-h-screen flex flex-col`}>
       <Header />
       <Main />
-      <Footer />
+      {/* <Footer /> */}
     </main>
   );
 }
